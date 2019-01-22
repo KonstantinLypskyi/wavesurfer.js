@@ -68,9 +68,7 @@ export default class Drawer extends util.Observer {
 
         if (this.params.fillParent || this.params.scrollParent) {
             this.style(this.wrapper, {
-                width: '100%',
-                overflowX: this.params.hideScrollbar ? 'hidden' : 'auto',
-                overflowY: 'hidden'
+                width: '100%'
             });
         }
 
@@ -299,7 +297,7 @@ export default class Drawer extends util.Observer {
      *
      * @param {number} progress From 0 to 1
      */
-    progress(progress) {
+    progress(progress, time) {
         const minPxDelta = 1 / this.params.pixelRatio;
         const pos = Math.round(progress * this.width) * minPxDelta;
 
@@ -311,7 +309,7 @@ export default class Drawer extends util.Observer {
                 this.recenterOnPosition(newPos);
             }
 
-            this.updateProgress(pos);
+            this.updateProgress(pos, time);
         }
     }
 

@@ -100,5 +100,8 @@
     "*.html": [
       "htmlhint"
     ]
+  },
+  "dependencies": {
+    "moment": "^2.24.0"
   }
 }

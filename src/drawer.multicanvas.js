@@ -1,4 +1,5 @@
 import Drawer from './drawer';
+import moment from 'moment';
 import * as util from './util';
 
 /**
@@ -82,24 +83,51 @@ export default class MultiCanvas extends Drawer {
                 width: '0',
                 display: 'none',
                 boxSizing: 'border-box',
-                borderRightStyle: 'solid',
                 pointerEvents: 'none'
             })
         );
 
+        this.cursorBlock = this.wrapper.appendChild(
+            this.style(document.createElement('div'), {
+                position: 'absolute',
+                zIndex: 5,
+                left: 0,
+                height: '100%'
+            })
+        );
+
+        this.customCursor = this.cursorBlock.appendChild(
+            this.style(document.createElement('canvas'), {
+                position: 'absolute',
+                left: 0,
+                background: 'red',
+                width: '4px',
+                height: '100%'
+            })
+        );
+
+        this.customCursor.className = 'custom_color';
+
+        this.customTimer = this.cursorBlock.appendChild(
+            this.style(document.createElement('div'), {
+                position: 'absolute',
+                zIndex: 6,
+                left: 0
+            })
+        );
+        this.customTimer.className = 'custom_timer';
+
+        this.customTimer.innerHTML = '00:00';
+
+        // const ctx = this.customCursor.getContext('2d');
+        // ctx.fillRect(0, 0, 50, 50);
+
         this.addCanvas();
-        this.updateCursor();
     }
 
     /**
      * Update cursor style from params.
      */
-    updateCursor() {
-        this.style(this.progressWave, {
-            borderRightWidth: this.params.cursorWidth + 'px',
-            borderRightColor: this.params.cursorColor
-        });
-    }
 
     /**
      * Adjust to the updated size by adding or removing canvases
@@ -169,6 +197,9 @@ export default class MultiCanvas extends Drawer {
             );
             entry.progressCtx = entry.progress.getContext('2d');
         }
+
+        entry.customCursor = this.customCursor;
+        entry.customCtx = entry.customCursor.getContext('2d');
 
         this.canvases.push(entry);
     }
@@ -613,12 +644,25 @@ export default class MultiCanvas extends Drawer {
         return images.length > 1 ? images : images[0];
     }
 
+    transformSec(sec) {
+        if (sec < 3600) {
+            return moment('1900-01-01 00:00:00')
+                .add(sec, 'seconds')
+                .format('mm:ss');
+        }
+        return moment('1900-01-01 00:00:00')
+            .add(sec, 'seconds')
+            .format('HH:mm:ss');
+    }
+
     /**
      * Render the new progress
      *
      * @param {number} position X-Offset of progress position in pixels
      */
-    updateProgress(position) {
+    updateProgress(position, time) {
+        this.customTimer.innerHTML = `${this.transformSec(Math.floor(time))}`;
+        this.style(this.cursorBlock, { left: position + 'px' });
         this.style(this.progressWave, { width: position + 'px' });
     }
 }

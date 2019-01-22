@@ -134,13 +134,13 @@ export default class TimelinePlugin {
                 height: 20,
                 notchPercentHeight: 90,
                 labelPadding: 5,
-                unlabeledNotchColor: '#c0c0c0',
+                unlabeledNotchColor: '#d8d8d8',
                 primaryColor: '#000',
                 secondaryColor: '#c0c0c0',
-                primaryFontColor: '#000',
-                secondaryFontColor: '#000',
+                primaryFontColor: '#b8b9c0',
+                secondaryFontColor: '#b8b9c0',
                 fontFamily: 'Arial',
-                fontSize: 10,
+                fontSize: 16,
                 duration: null,
                 zoomDebounce: false,
                 formatTimeCallback: this.defaultFormatTimeCallback,
@@ -383,7 +383,7 @@ export default class TimelinePlugin {
         this.setFillStyles(this.params.primaryFontColor);
         renderPositions((i, curSeconds, curPixel) => {
             if (i % primaryLabelInterval === 0) {
-                this.fillRect(curPixel, 0, 1, height1);
+                // this.fillRect(curPixel, 0, 1, height1);
                 this.fillText(
                     formatTime(curSeconds, pixelsPerSecond),
                     curPixel + this.params.labelPadding * this.pixelRatio,
@@ -398,7 +398,7 @@ export default class TimelinePlugin {
         this.setFillStyles(this.params.secondaryFontColor);
         renderPositions((i, curSeconds, curPixel) => {
             if (i % secondaryLabelInterval === 0) {
-                this.fillRect(curPixel, 0, 1, height1);
+                // this.fillRect(curPixel, 0, 1, height1);
                 this.fillText(
                     formatTime(curSeconds, pixelsPerSecond),
                     curPixel + this.params.labelPadding * this.pixelRatio,
@@ -414,7 +414,16 @@ export default class TimelinePlugin {
                 i % secondaryLabelInterval !== 0 &&
                 i % primaryLabelInterval !== 0
             ) {
-                this.fillRect(curPixel, 0, 1, height2);
+                if (i === 1) {
+                    console.log(i);
+                    this.fillRect(curPixel - 30, -3, 1, height2, 2);
+                    this.fillRect(curPixel - 15, -3, 1, height2, 3);
+                    this.fillRect(curPixel, -3, 1, height2, 2);
+                } else {
+                    this.fillRect(curPixel - 15, -3, 1, height2, 2);
+                    this.fillRect(curPixel, -3, 1, height2, 3);
+                    this.fillRect(curPixel + 15, -3, 1, height2, 2);
+                }
             }
         });
     }
@@ -454,7 +463,7 @@ export default class TimelinePlugin {
      * @param {number} height
      * @private
      */
-    fillRect(x, y, width, height) {
+    fillRect(x, y, width, height, widthBall) {
         this.canvases.forEach((canvas, i) => {
             const leftOffset = i * this.maxCanvasWidth;
 
@@ -466,14 +475,16 @@ export default class TimelinePlugin {
             };
 
             if (intersection.x1 < intersection.x2) {
-                canvas
-                    .getContext('2d')
-                    .fillRect(
-                        intersection.x1 - leftOffset,
-                        intersection.y1,
-                        intersection.x2 - intersection.x1,
-                        intersection.y2 - intersection.y1
-                    );
+                const ctx = canvas.getContext('2d');
+                ctx.beginPath();
+                ctx.arc(
+                    intersection.x1 + 24,
+                    intersection.y1 + 18,
+                    widthBall,
+                    0,
+                    2 * Math.PI
+                );
+                ctx.fill();
             }
         });
     }
@@ -514,7 +525,7 @@ export default class TimelinePlugin {
      * @param {number} pxPerSec
      */
     defaultFormatTimeCallback(seconds, pxPerSec) {
-        if (seconds / 60 > 1) {
+        if (seconds > 0) {
             // calculate minutes and seconds from seconds count
             const minutes = parseInt(seconds / 60, 10);
             seconds = parseInt(seconds % 60, 10);
@@ -522,7 +533,7 @@ export default class TimelinePlugin {
             seconds = seconds < 10 ? '0' + seconds : seconds;
             return `${minutes}:${seconds}`;
         }
-        return Math.round(seconds * 1000) / 1000;
+        return '0';
     }
 
     /**
@@ -531,14 +542,26 @@ export default class TimelinePlugin {
      * @param pxPerSec
      */
     defaultTimeInterval(pxPerSec) {
-        if (pxPerSec >= 25) {
-            return 1;
-        } else if (pxPerSec * 5 >= 25) {
-            return 5;
-        } else if (pxPerSec * 15 >= 25) {
+        if (pxPerSec > 25) {
             return 15;
+        } else if (pxPerSec * 15 >= 25) {
+            return 30;
+        } else if (pxPerSec * 30 >= 25) {
+            return 60;
+        } else if (pxPerSec * 75 >= 25) {
+            return 150;
+        } else if (pxPerSec * 150 >= 25) {
+            return 300;
+        } else if (pxPerSec * 300 >= 25) {
+            return 600;
+        } else if (pxPerSec * 450 >= 25) {
+            return 900;
+        } else if (pxPerSec * 900 >= 25) {
+            return 1800;
+        } else if (pxPerSec * 1800 >= 25) {
+            return 3600;
         }
-        return Math.ceil(0.5 / pxPerSec) * 60;
+        return Math.ceil(0.5 / pxPerSec) * 1800;
     }
 
     /**
@@ -547,14 +570,7 @@ export default class TimelinePlugin {
      * @param pxPerSec
      */
     defaultPrimaryLabelInterval(pxPerSec) {
-        if (pxPerSec >= 25) {
-            return 10;
-        } else if (pxPerSec * 5 >= 25) {
-            return 6;
-        } else if (pxPerSec * 15 >= 25) {
-            return 4;
-        }
-        return 4;
+        return 2;
     }
 
     /**
@@ -564,12 +580,12 @@ export default class TimelinePlugin {
      */
     defaultSecondaryLabelInterval(pxPerSec) {
         if (pxPerSec >= 25) {
-            return 5;
+            return 2;
         } else if (pxPerSec * 5 >= 25) {
-            return 2;
+            return 8;
         } else if (pxPerSec * 15 >= 25) {
-            return 2;
+            return 4;
         }
-        return 2;
+        return 4;
     }
 }

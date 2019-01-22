@@ -18,11 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         start: 1,
                         end: 3,
                         color: 'hsla(400, 100%, 30%, 0.5)'
-                    },
-                    {
-                        start: 5,
-                        end: 7,
-                        color: 'hsla(200, 50%, 70%, 0.4)'
                     }
                 ],
                 dragSelection: {

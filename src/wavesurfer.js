@@ -613,7 +613,7 @@ export default class WaveSurfer extends util.Observer {
         this.backend.on('pause', () => this.fireEvent('pause'));
 
         this.backend.on('audioprocess', time => {
-            this.drawer.progress(this.backend.getPlayedPercents());
+            this.drawer.progress(this.backend.getPlayedPercents(), time);
             this.fireEvent('audioprocess', time);
         });
     }
@@ -796,7 +796,7 @@ export default class WaveSurfer extends util.Observer {
         const oldScrollParent = this.params.scrollParent;
         this.params.scrollParent = false;
         this.backend.seekTo(progress * this.getDuration());
-        this.drawer.progress(progress);
+        this.drawer.progress(progress, progress * this.getDuration());
 
         if (!paused) {
             this.backend.play();
